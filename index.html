@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GOD LEVEL GAME</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+            color: white;
+            font-family: Arial;
+        }
+        #player, .enemy {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+        }
+        #player { background: cyan; }
+        .enemy { background: red; }
+
+        #ui {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+        }
+
+        #gameOver {
+            display: none;
+            position: fixed;
+            top: 40%;
+            width: 100%;
+            text-align: center;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    Score: <span id="score">0</span>
+</div>
+
+<div id="player"></div>
+<div id="gameOver">💀 GAME OVER <br><button onclick="restart()">Restart</button></div>
+
+<script>
+let player = document.getElementById("player");
+let scoreEl = document.getElementById("score");
+let gameOverEl = document.getElementById("gameOver");
+
+let x = 200, y = 200;
+let speed = 5;
+let score = 0;
+let keys = {};
+let enemies = [];
+let gameRunning = true;
+
+// Keyboard controls
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+// Create enemy
+function createEnemy() {
+    let e = document.createElement("div");
+    e.className = "enemy";
+    e.x = Math.random() * window.innerWidth;
+    e.y = Math.random() * window.innerHeight;
+    document.body.appendChild(e);
+    enemies.push(e);
+}
+
+// Movement loop
+function update() {
+    if (!gameRunning) return;
+
+    // Player movement
+    if (keys["ArrowUp"]) y -= speed;
+    if (keys["ArrowDown"]) y += speed;
+    if (keys["ArrowLeft"]) x -= speed;
+    if (keys["ArrowRight"]) x += speed;
+
+    player.style.left = x + "px";
+    player.style.top = y + "px";
+
+    // Enemy AI (chasing you)
+    enemies.forEach(e => {
+        let dx = x - e.x;
+        let dy = y - e.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        e.x += dx / dist * 2;
+        e.y += dy / dist * 2;
+
+        e.style.left = e.x + "px";
+        e.style.top = e.y + "px";
+
+        // Collision
+        if (dist < 30) endGame();
+    });
+
+    requestAnimationFrame(update);
+}
+
+// Score + spawn enemies
+setInterval(() => {
+    if (!gameRunning) return;
+    score++;
+    scoreEl.innerText = score;
+
+    if (score % 5 === 0) createEnemy();
+}, 1000);
+
+// End game
+function endGame() {
+    gameRunning = false;
+    gameOverEl.style.display = "block";
+}
+
+// Restart
+function restart() {
+    location.reload();
+}
+
+// Start
+createEnemy();
+update();
+</script>
+
+</body>
+</html>
